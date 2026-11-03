@@ -8,3 +8,8 @@ Add to Droid-ify or another F-Droid client:
 ## Apps
 
 - NissanConnect (unofficial): not affiliated with or endorsed by Nissan.
+- VOD: Android TV and phone player for Xtream-style servers. Bring your own server.
+
+## Publishing
+
+Run `scripts/sync.sh` on the Mac holding the repo signing key. It publishes each app's latest GitHub release.

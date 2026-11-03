@@ -4,6 +4,8 @@
 !.gitignore
 !.nojekyll
 !README.md
+!scripts/
+!scripts/**
 !fdroid/
 !fdroid/metadata/
 !fdroid/metadata/**
