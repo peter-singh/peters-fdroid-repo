@@ -1,0 +1,13 @@
+# Allowlist: only the public repo output and app metadata are ever committed.
+# fdroid/config.yml and fdroid/keystore.p12 hold the repo signing key and passwords.
+*
+!.gitignore
+!.nojekyll
+!README.md
+!fdroid/
+!fdroid/metadata/
+!fdroid/metadata/**
+!fdroid/repo/
+!fdroid/repo/**
+# Build logs: contain local paths and are not needed by clients.
+fdroid/repo/status/
