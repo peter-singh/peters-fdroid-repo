@@ -17,4 +17,14 @@ Or scan this QR code:
 
 ## Publishing
 
-Run `scripts/sync.sh` on the Mac holding the repo signing key. It publishes each app's latest GitHub release.
+`.github/workflows/publish.yml` runs `scripts/sync.sh` every hour, publishing each app's latest GitHub release. To publish straight away:
+
+```
+gh workflow run publish.yml -R peter-singh/peters-fdroid-repo
+```
+
+The repo signing key and config are secrets in the `fdroid-publish` environment, which only `main` can use. `FDROID_APPS_TOKEN` there has read access to the app repos' releases; when it expires, the workflow fails until it's replaced.
+
+GitHub turns off scheduled workflows after 60 days without activity in the repo. Turn it back on in the Actions tab.
+
+Keep `fdroid/keystore.p12` on the Mac: secrets can't be read back, and losing the key means every client has to add the repo again. `scripts/sync.sh` also runs there as a fallback.

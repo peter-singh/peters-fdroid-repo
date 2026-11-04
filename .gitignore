@@ -4,6 +4,8 @@
 !.gitignore
 !.nojekyll
 !README.md
+!.github/
+!.github/**
 !scripts/
 !scripts/**
 !fdroid/

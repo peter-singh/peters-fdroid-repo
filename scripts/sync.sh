@@ -2,7 +2,8 @@
 # Publish the latest GitHub release of each app below to this F-Droid repo.
 #   scripts/sync.sh              download, sign the index, commit and push
 #   scripts/sync.sh --no-push    stop before committing
-# The repo signing key stays on this Mac (fdroid/keystore.p12), so this runs here, not in CI.
+# Normally run by .github/workflows/publish.yml. It also runs on the Mac holding
+# fdroid/keystore.p12, which is the backup of the key in the workflow's secrets.
 set -euo pipefail
 
 # GitHub repo | release asset pattern | SHA-256 of the signing certificate

@@ -1,0 +1,64 @@
+name: Publish
+
+# Publishes each app's latest GitHub release: see scripts/sync.sh. The repo
+# signing key is only in the fdroid-publish environment, which only main can
+# use. Never add a pull_request trigger here.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 * * * *"
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: fdroid-publish
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install fdroidserver
+        run: pipx install fdroidserver==2.4.5
+
+      - name: Restore the signing key and config
+        env:
+          KEYSTORE_BASE64: ${{ secrets.FDROID_KEYSTORE_BASE64 }}
+          CONFIG_YML: ${{ secrets.FDROID_CONFIG_YML }}
+        run: |
+          [ -n "$KEYSTORE_BASE64" ] && [ -n "$CONFIG_YML" ] || { echo "::error::The signing key secrets are not set"; exit 1; }
+          umask 077
+          printf '%s' "$KEYSTORE_BASE64" | base64 -d > fdroid/keystore.p12
+          printf '%s\n' "$CONFIG_YML" > fdroid/config.yml
+          git check-ignore -q fdroid/keystore.p12 fdroid/config.yml || { echo "::error::The signing key is not gitignored"; exit 1; }
+
+      - name: Sync
+        env:
+          GH_TOKEN: ${{ secrets.FDROID_APPS_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          before=$(git rev-parse HEAD)
+          scripts/sync.sh
+          [ "$(git rev-parse HEAD)" = "$before" ] || echo "PUBLISHED=true" >> "$GITHUB_ENV"
+
+      # A push with the workflow's own token may not start a Pages build.
+      - name: Build Pages
+        if: env.PUBLISHED == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X POST "repos/$GITHUB_REPOSITORY/pages/builds" --silent
+
+      - name: Remove the signing key and config
+        if: always()
+        run: rm -f fdroid/keystore.p12 fdroid/config.yml
