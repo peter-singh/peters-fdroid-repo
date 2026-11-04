@@ -28,8 +28,9 @@ for app in "${APPS[@]}"; do
   apk="$(printf '%s\n' "$dir"/*.apk | head -n1)"
 
   # A different key could never update installed copies, and a debuggable build shouldn't be public.
-  actual="$("$build_tools/apksigner" verify --print-certs "$apk" 2>/dev/null | sed -n 's/^Signer #1 certificate SHA-256 digest: //p')"
-  if [ "$actual" != "$cert" ]; then echo "sync: $repo $tag has the wrong signing certificate: $actual" >&2; exit 1; fi
+  certs="$("$build_tools/apksigner" verify --print-certs "$apk" 2>&1)"
+  actual="$(grep -m1 'SHA-256 digest' <<< "$certs" | awk '{print $NF}')"
+  if [ "$actual" != "$cert" ]; then echo "sync: $repo $tag has the wrong signing certificate: $actual" >&2; echo "$certs" >&2; exit 1; fi
   badging="$("$build_tools/aapt2" dump badging "$apk")"
   if grep -q '^application-debuggable' <<< "$badging"; then echo "sync: $repo $tag is debuggable, refusing to publish" >&2; exit 1; fi
 
