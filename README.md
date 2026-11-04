@@ -17,7 +17,7 @@ Or scan this QR code:
 
 ## Publishing
 
-`.github/workflows/publish.yml` runs `scripts/sync.sh`, publishing each app's latest GitHub release. Scran's release workflow triggers it. For VOD, or any other time, run:
+`.github/workflows/publish.yml` runs `scripts/sync.sh`, publishing each app's latest GitHub release. Each app's release workflow triggers it when a merge bumps the version. To run it by hand:
 
 ```
 gh workflow run publish.yml -R peter-singh/peters-fdroid-repo

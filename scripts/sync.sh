@@ -10,6 +10,7 @@ set -euo pipefail
 APPS=(
   "peter-singh/tv-app|vod-*.apk|ad4cc2a54766dd701cca4ad31fd6d7d0c343511c289cb7d256b3384a55ae3001"
   "peter-singh/shopping-list|scran-*-list.prd.scot.apk|1a2927a1189c9a2f1738dd7e531a13b6cb69ecec40bdc4bf9467a1c6dca1ded9"
+  "peter-singh/nissan_connect_android|nissan-connect-v*.apk|23177c8a2c291447798dfe256d86f7dbc679e08c7bffa0ee0a9c2d83425ae49c"
 )
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
