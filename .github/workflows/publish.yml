@@ -2,11 +2,9 @@ name: Publish
 
 # Publishes each app's latest GitHub release: see scripts/sync.sh. The repo
 # signing key is only in the fdroid-publish environment, which only main can
-# use. Never add a pull_request trigger here.
+# use. App release workflows trigger this. Never add a pull_request trigger here.
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "17 * * * *"
 
 concurrency:
   group: publish
