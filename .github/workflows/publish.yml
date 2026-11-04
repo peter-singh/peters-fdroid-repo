@@ -40,7 +40,9 @@ jobs:
           umask 077
           printf '%s' "$KEYSTORE_BASE64" | base64 -d > fdroid/keystore.p12
           printf '%s\n' "$CONFIG_YML" > fdroid/config.yml
-          git check-ignore -q fdroid/keystore.p12 fdroid/config.yml || { echo "::error::The signing key is not gitignored"; exit 1; }
+          for file in fdroid/keystore.p12 fdroid/config.yml; do
+            git check-ignore -q "$file" || { echo "::error::$file is not gitignored"; exit 1; }
+          done
 
       - name: Sync
         env:
