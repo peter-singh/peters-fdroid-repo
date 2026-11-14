@@ -11,6 +11,8 @@
 !fdroid/
 !fdroid/metadata/
 !fdroid/metadata/**
+# Checksum of the metadata last published (scripts/sync.sh).
+!fdroid/metadata.sha256
 !fdroid/repo/
 !fdroid/repo/**
 # Build logs: contain local paths and are not needed by clients.

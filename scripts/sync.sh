@@ -48,7 +48,7 @@ done
 # metadata change republishes it even with no new APK. Compared by checksum against the last
 # publish, not by commit times, which a shallow CI checkout can't tell apart.
 published_sum="$ROOT/fdroid/metadata.sha256"
-metadata_sum="$(cd "$ROOT/fdroid" && cat metadata/*.yml | sha256sum | awk '{print $1}')"
+metadata_sum="$(cd "$ROOT/fdroid" && cat metadata/*.yml | shasum -a 256 | awk '{print $1}')"
 metadata_changed=false
 if [ "$metadata_sum" != "$(cat "$published_sum" 2>/dev/null)" ]; then metadata_changed=true; fi
 if [ ${#added[@]} -eq 0 ] && ! $metadata_changed; then echo "sync: nothing new"; exit 0; fi
