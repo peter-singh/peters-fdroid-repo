@@ -45,14 +45,15 @@ for app in "${APPS[@]}"; do
 done
 
 # Metadata (name, summary, description) only reaches clients through a re-signed index, so a
-# metadata commit newer than the index republishes it even with no new APK. CI's checkout is
-# shallow, so a path the fetched commit didn't touch has no time: count it as 0.
-metadata_time="$(git -C "$ROOT" log -1 --format=%ct -- fdroid/metadata)"
-index_time="$(git -C "$ROOT" log -1 --format=%ct -- fdroid/repo/index-v2.json)"
+# metadata change republishes it even with no new APK. Compared by checksum against the last
+# publish, not by commit times, which a shallow CI checkout can't tell apart.
+published_sum="$ROOT/fdroid/metadata.sha256"
+metadata_sum="$(cd "$ROOT/fdroid" && cat metadata/*.yml | sha256sum | awk '{print $1}')"
 metadata_changed=false
-if [ "${metadata_time:-0}" -gt "${index_time:-0}" ]; then metadata_changed=true; fi
+if [ "$metadata_sum" != "$(cat "$published_sum" 2>/dev/null)" ]; then metadata_changed=true; fi
 if [ ${#added[@]} -eq 0 ] && ! $metadata_changed; then echo "sync: nothing new"; exit 0; fi
 (cd "$ROOT/fdroid" && fdroid update)
+echo "$metadata_sum" > "$published_sum"
 message="Publish ${added[*]}"; [ ${#added[@]} -eq 0 ] && message="Publish metadata changes"
 if [ "${1:-}" = "--no-push" ]; then echo "sync: ready to commit: $message"; exit 0; fi
 git -C "$ROOT" add -A
