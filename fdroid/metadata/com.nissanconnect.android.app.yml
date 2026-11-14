@@ -1,7 +1,8 @@
 Categories:
   - Connectivity
-Name: NissanConnect (unofficial)
-Summary: Unofficial client for checking and controlling your Nissan EV
+Name: Juiced (unofficial)
+Summary: Unofficial app for checking and controlling your Nissan EV
 Description: |-
-  Unofficial app for checking battery status and starting climate control on your Nissan EV.
+  Juiced, formerly NissanConnect: an unofficial app for checking battery status and starting
+  climate control on your Nissan EV, with a home-screen widget, Tasker plugin and Wear OS app.
   Not affiliated with or endorsed by Nissan. Sign in with your own account.

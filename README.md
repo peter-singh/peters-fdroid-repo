@@ -11,7 +11,7 @@ Or scan this QR code:
 
 ## Apps
 
-- NissanConnect (unofficial): not affiliated with or endorsed by Nissan.
+- Juiced (unofficial), formerly NissanConnect: for Nissan EVs, not affiliated with or endorsed by Nissan.
 - VOD: Android TV and phone player for Xtream-style servers. Bring your own server.
 - Scran: shopping lists and meal planning, for an account on list.prd.scot.
 

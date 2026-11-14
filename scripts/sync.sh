@@ -6,11 +6,11 @@
 # fdroid/keystore.p12, which is the backup of the key in the workflow's secrets.
 set -euo pipefail
 
-# GitHub repo | release asset pattern | SHA-256 of the signing certificate
+# GitHub repo | release asset patterns (space-separated, any may match) | SHA-256 of the signing certificate
 APPS=(
   "peter-singh/tv-app|vod-*.apk|ad4cc2a54766dd701cca4ad31fd6d7d0c343511c289cb7d256b3384a55ae3001"
   "peter-singh/shopping-list|scran-*-list.prd.scot.apk|1a2927a1189c9a2f1738dd7e531a13b6cb69ecec40bdc4bf9467a1c6dca1ded9"
-  "peter-singh/nissan_connect_android|nissan-connect-v*.apk|23177c8a2c291447798dfe256d86f7dbc679e08c7bffa0ee0a9c2d83425ae49c"
+  "peter-singh/nissan_connect_android|juiced-v*.apk nissan-connect-v*.apk|23177c8a2c291447798dfe256d86f7dbc679e08c7bffa0ee0a9c2d83425ae49c"
 )
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -25,7 +25,8 @@ for app in "${APPS[@]}"; do
   IFS='|' read -r repo pattern cert <<< "$app"
   tag="$(gh release list -R "$repo" --exclude-drafts --limit 1 --json tagName --jq '.[0].tagName')"
   dir="$tmp/${repo##*/}"; mkdir -p "$dir"
-  gh release download "$tag" -R "$repo" -p "$pattern" -D "$dir"
+  read -ra patterns <<< "$pattern"
+  gh release download "$tag" -R "$repo" "${patterns[@]/#/-p=}" -D "$dir"
   apk="$(printf '%s\n' "$dir"/*.apk | head -n1)"
 
   # A different key could never update installed copies, and a debuggable build shouldn't be public.
@@ -43,9 +44,17 @@ for app in "${APPS[@]}"; do
   added+=("$package $tag")
 done
 
-if [ ${#added[@]} -eq 0 ]; then echo "sync: nothing new"; exit 0; fi
+# Metadata (name, summary, description) only reaches clients through a re-signed index, so a
+# metadata commit newer than the index republishes it even with no new APK. CI's checkout is
+# shallow, so a path the fetched commit didn't touch has no time: count it as 0.
+metadata_time="$(git -C "$ROOT" log -1 --format=%ct -- fdroid/metadata)"
+index_time="$(git -C "$ROOT" log -1 --format=%ct -- fdroid/repo/index-v2.json)"
+metadata_changed=false
+if [ "${metadata_time:-0}" -gt "${index_time:-0}" ]; then metadata_changed=true; fi
+if [ ${#added[@]} -eq 0 ] && ! $metadata_changed; then echo "sync: nothing new"; exit 0; fi
 (cd "$ROOT/fdroid" && fdroid update)
-if [ "${1:-}" = "--no-push" ]; then echo "sync: ready to commit: ${added[*]}"; exit 0; fi
+message="Publish ${added[*]}"; [ ${#added[@]} -eq 0 ] && message="Publish metadata changes"
+if [ "${1:-}" = "--no-push" ]; then echo "sync: ready to commit: $message"; exit 0; fi
 git -C "$ROOT" add -A
-git -C "$ROOT" commit -m "Publish ${added[*]}"
+git -C "$ROOT" commit -m "$message"
 git -C "$ROOT" push origin main
